@@ -1,0 +1,413 @@
+<template>
+    <div class="flex flex-col h-full w-full bg-gradient-to-br from-blue-900/5 to-blue-900/20 text-white font-inter">
+        <div class="flex items-center justify-between px-6 py-3 bg-blue-900/10 border-b border-blue-900/20 draggable">
+            <h2 class="text-sm font-light select-none">kaiii's AutoHyper</h2>
+            <div class="flex items-center gap-3">
+                <div @click="minimizeWindow()" class="flex items-center justify-center rounded-full bg-black/20 hover:bg-blue-900 text-gray-500 p-1 -m-1 hover:text-white transition ease duration-200 no-drag cursor-pointer">
+                    <i class="bx bx-minus"></i>
+                </div>
+                <div @click="closeWindow()" class="flex items-center justify-center rounded-full bg-black/20 hover:bg-blue-900 text-gray-500 p-1 -m-1 hover:text-white transition ease duration-200 no-drag cursor-pointer">
+                    <i class="bx bx-x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col flex-grow relative">
+            <!-- <div class="absolute top-0 right-0 bottom-0 left-0 bg-slate-900 z-50 transition ease duration-200" :class="{
+                'opacity-0 pointer-events-none': !settingsOpen
+            }">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <h2>AutoHyper Settings</h2>
+                    <div @click="toggleSettings()" class="flex flex-col items-center justify-center w-[40px] h-[40px] rounded-full bg-black/20 hover:bg-black/40 transition ease duration-200 cursor-pointer">
+                        <i class="bx bx-x"></i>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between gap-6 px-6 py-3">
+                    <h2>Target Window</h2>
+                    <div class="flex flex-col relative flex-grow">
+                        <div @click="toggleTargetWindowDropdown()" class="flex items-center justify-between text-sm bg-black/20 px-4 py-2 border border-b-2 border-blue-900/20 rounded-lg cursor-pointer hover:bg-black/40 transition ease duration-200 select-none">
+                            <h2 v-if="targetWindow">{{ targetWindow.mainWindowTitle }}</h2>
+                            <h2 v-else>No window selected</h2>
+                        </div>
+                        <div class="flex flex-col absolute w-full top-full mt-1 bg-slate-900 rounded-lg border border-b-2 border-blue-900/40 divide-y divide-blue-900/10 transition ease duration-200 max-h-[300px] overflow-y-auto" :class="{
+                            'opacity-0 pointer-events-none scale-75 rotate-6': !targetWindowDropdownOpen
+                        }">
+                            <h2 @click="setTargetWindow(app)" v-for="app in openApps" :key="app.pid" class="text-xs px-4 py-2 text-gray-500 hover:text-white cursor-pointer transition ease duration-200 select-none">{{ app.mainWindowTitle }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+            <div class="absolute top-0 right-0 bottom-0 left-0 z-50 backdrop-blur transition ease duration-200" :class="{
+                'opacity-0 pointer-events-none': !settingsOpen
+            }">
+                <div class="flex flex-col h-full items-center justify-center">
+                    <div class="flex flex-col w-2/3 bg-slate-900 rounded-lg border border-b-2 border-blue-900/20">
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-blue-900/20">
+                            <h2 class="text-sm font-light">AutoHyper Settings</h2>
+                            <i @click="settingsOpen = false" class="bx bx-x text-gray-500 hover:text-white cursor-pointer transition ease duration-200 p-4 -m-4"></i>
+                        </div>
+                        <div class="flex flex-col gap-2 px-6 py-3">
+                            <div class="flex items-center justify-between gap-6">
+                                <h2 class="text-xs w-[170px] shrink-0">Target Window</h2>
+                                <div class="flex flex-col relative flex-grow">
+                                    <div @click="toggleTargetWindowDropdown()" class="flex items-center justify-between text-xs bg-black/20 px-4 py-2 border border-b-2 border-blue-900/20 rounded-lg cursor-pointer hover:bg-black/40 transition ease duration-200 select-none overflow-hidden">
+                                        <h2 v-if="targetWindow" class="truncate">{{ targetWindow.mainWindowTitle }}</h2>
+                                        <h2 v-else>No window selected</h2>
+                                    </div>
+                                    <div class="flex flex-col absolute z-50 w-full top-full mt-1 bg-slate-900 rounded-lg border border-b-2 border-blue-900/40 divide-y divide-blue-900/10 transition ease duration-200 max-h-[100px] overflow-y-auto" :class="{
+                                        'opacity-0 pointer-events-none scale-75 rotate-6': !targetWindowDropdownOpen
+                                    }">
+                                        <h2 @click="setTargetWindow(app)" v-for="app in openApps" :key="app.pid" class="text-xs px-4 py-2 text-gray-500 hover:text-white cursor-pointer transition ease duration-200 select-none">{{ app.mainWindowTitle }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <h2 class="text-xs text-gray-500">If the target window is not focused, the autotyper will pause until the target window is re-focused.</h2>
+                            </div>
+                            <div class="flex items-center justify-between gap-6">
+                                <h2 class="text-xs w-[170px] shrink-0">Minimum Delay (s)</h2>
+                                <input type="number" v-model="minDelay" class="w-[100px] text-xs bg-black/20 px-4 py-2 border border-b-2 border-blue-900/20 rounded-lg hover:bg-black/40 transition ease duration-200 select-none outline-none">
+                            </div>
+                            <div class="flex items-center justify-between gap-6">
+                                <h2 class="text-xs w-[170px] shrink-0">Maximum Delay (s)</h2>
+                                <input type="number" v-model="maxDelay" class="w-[100px] text-xs bg-black/20 px-4 py-2 border border-b-2 border-blue-900/20 rounded-lg hover:bg-black/40 transition ease duration-200 select-none outline-none">
+                            </div>
+                            <div class="flex items-center justify-between gap-6">
+                                <h2 class="text-xs w-[170px] shrink-0">Start/Pause Shortcut</h2>
+                                <div class="flex items-center">
+                                    <div @click="toggleSettingShortcut()" class="flex items-center gap-4 bg-black/20 px-4 py-2 rounded-lg hover:bg-black/40 border border-b-2 border-blue-900/20 text-xs cursor-pointer transition ease duration-200 select-none">
+                                        <h2 v-for="key in shortcut" :key="key" v-if="!isSettingShortcut">{{ key }}</h2>
+                                        <h2 v-for="newKey in newShortcutSetting" :key="newKey" v-else>{{ newKey }}</h2>
+
+                                        <h2 v-if="!isSettingShortcut && shortcut.length === 0">Click to set</h2>
+                                        <h2 v-if="isSettingShortcut && newShortcutSetting.length === 0">Press each key once</h2>
+                                    </div>
+                                    <div class="flex items-center gap-2" v-if="isSettingShortcut">
+                                        <button @click="isSettingShortcut = false" class="flex items-center justify-center w-[30px] h-[30px] text-gray-500 hover:text-white cursor-pointer transition ease duration-200">
+                                            <i class="bx bx-x"></i>
+                                        </button>
+                                        <button @click="saveNewShortcut()" class="flex items-center justify-center w-[30px] h-[30px] text-gray-500 hover:text-white cursor-pointer transition ease duration-200">
+                                            <i class="bx bx-save"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <h2 class="text-xs text-gray-500">Press each key for the shortcut once. Example: Tap CTRL, then SHIFT, then H. Check the box when done</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute top-0 right-0 bottom-0 left-0 z-50 backdrop-blur transition ease duration-200" :class="{
+                'opacity-0 pointer-events-none': !newMessageModalOpen
+            }">
+                <div class="flex flex-col h-full items-center justify-center">
+                    <div class="flex flex-col gap-2 w-1/2 bg-slate-900 rounded-lg border border-b-2 border-blue-900/20 p-4">
+                        <div class="flex flex-col h-[100px] relative">
+                            <textarea v-model="newMessage" placeholder="Type your message here..." class="w-full h-full resize-none border border-b-2 border-blue-900/20 rounded-lg bg-black/20 hover:border-blue-900/40 focus:border-blue-900/40 placeholder:text-gray-500 text-sm focus:shadow outline-none transition ease duration-200 p-4"></textarea>
+                            <h2 class="absolute bottom-2 right-2 text-xs" :class="{
+                                'text-red-500 font-semibold animate-pulse': newMessageLength > 80,
+                                'text-gray-500': newMessageLength <= 80
+                            }">{{ newMessageLength }}/80</h2>
+                        </div>
+                        <button @click="addMessage()" class="px-6 py-3 text-gray-400 bg-blue-900/20 rounded-lg border border-b-2 border-blue-900/40 text-sm hover:text-white hover:bg-blue-900/40 hover:border-blue-900/60 transition ease duration-200 outline-none" :class="{
+                            'cursor-not-allowed': newMessageLength > 80
+                        }">
+                            Add Message
+                        </button>
+                    </div>
+                    <h2 class="text-gray-300 text-xs mt-4 select-none">Press escape to close</h2>
+                </div>
+            </div>
+            <div class="flex flex-col flex-grow relative">
+                <div class="flex items-center justify-between px-6 py-3">
+                    <div class="flex flex-col">
+                        <h2 class="font-semibold">Message Queue</h2>
+                        <h2 class="text-xs text-gray-500">GE Lines - 500M</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="flex items-center gap-3 px-4 py-2 rounded-lg bg-blue-900/5 border border-b-2 border-blue-900/20 text-gray-400 hover:text-white hover:bg-blue-900/10 hover:border-blue-900/40 transition ease duration-200 cursor-pointer select-none text-xs">
+                            <i class="bx bx-folder-open"></i>
+                            <h2>Open</h2>
+                        </button>
+                        <button class="flex items-center gap-3 px-4 py-2 rounded-lg bg-blue-900/5 border border-b-2 border-blue-900/20 text-gray-400 hover:text-white hover:bg-blue-900/10 hover:border-blue-900/40 transition ease duration-200 cursor-pointer select-none text-xs">
+                            <i class="bx bx-save"></i>
+                            <h2>Save</h2>
+                        </button>
+                        <button @click="toggleSettings()" class="flex items-center gap-3 px-4 py-2 h-[35px] rounded-lg bg-blue-900/5 border border-b-2 border-blue-900/20 text-gray-400 hover:text-white hover:bg-blue-900/10 hover:border-blue-900/40 transition ease duration-200 cursor-pointer select-none text-xs">
+                            <i class="bx bx-cog"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-grow divide-y divide-blue-900/10 bg-blue-900/5 border border-b-0 border-blue-900/20 rounded-t-lg overflow-y-auto max-h-[282px] mx-6" v-if="messages.length > 0">
+                    <div class="flex items-center px-4 py-2 text-gray-500 hover:text-white relative group transition ease duration-200" v-for="(message, index) in messages" :key="index" :class="{
+                        'hover:bg-blue-900/5': editingMessage !== index,
+                        'bg-blue-900/10': editingMessage === index
+                    }">
+                        <i class="bx bx-loader-dots animate-spin mr-3" v-if="running && messageIndex < index"></i>
+                        <i class="bx bx-check text-green-500 mr-3" v-if="running && messageIndex > index"></i>
+                        <h2 class="text-xs w-[28px]" v-if="running && messageIndex === index">{{ nextTick - tick }}s</h2>
+                        <input :id="'message-input-' + index" type="text" v-model="editingMessageValue" v-if="editingMessage === index" class="w-full bg-transparent outline-none text-sm text-white transition ease duration-200"></input>
+                        <h2 v-else class="text-sm">{{ message }}</h2>
+                        <div class="flex items-center gap-2 absolute right-2" v-if="editingMessage !== index">
+                            <div @click="editMessage(index)" class="flex items-center justify-center h-[30px] w-[30px] opacity-0 cursor-pointer group-hover:opacity-100 text-gray-500 hover:text-white transition ease duration-200">
+                                <i class="bx bx-pencil"></i>
+                            </div>
+                            <div @click="deleteMessage(index)" class="flex items-center justify-center h-[30px] w-[30px] opacity-0 cursor-pointer group-hover:opacity-100 text-gray-500 hover:text-white transition ease duration-200">
+                                <i class="bx bx-trash"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 absolute right-2" v-else>
+                            <div @click="cancelEditMessage(index)" class="flex items-center justify-center h-[30px] w-[30px] cursor-pointer text-gray-500 hover:text-white transition ease duration-200">
+                                <i class="bx bx-x"></i>
+                            </div>
+                            <div @click="saveMessage(index)" class="flex items-center justify-center h-[30px] w-[30px] cursor-pointer text-gray-500 hover:text-white transition ease duration-200">
+                                <i class="bx bx-save"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6">
+                    <button @click="newMessageModalOpen = true" class="w-full px-4 py-3 mt-auto bg-blue-900/5 border border-blue-900/20 rounded-b-lg text-gray-400 text-sm hover:text-white hover:bg-blue-900/10 cursor-pointer select-none transition ease duration-200 outline-none">
+                        <h2>Add Messages</h2>
+                    </button>
+                </div>
+                <div @click="newMessageModalOpen = true" class="flex flex-col gap-3 items-center justify-center flex-grow bg-blue-900/5 border border-b-2 border-blue-900/20 rounded-lg mx-6 cursor-pointer select-none" v-if="messages.length === 0">
+                    <i class="bx bx-sad text-5xl"></i>
+                    <h2 class="text-sm text-white font-semibold">Empty queue</h2>
+                    <h2 class="text-xs text-gray-500">Click here to add a message</h2>
+                </div>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3">
+                <div class="flex items-center gap-3">
+                    <button @click="start()" class="flex items-center gap-3 text-sm px-4 py-2 h-[39px] bg-blue-900/20 rounded-lg border border-b-2 border-blue-900/20" v-if="!this.running">
+                        <i class="bx bx-play"></i>
+                    </button>
+                    <div class="flex items-center gap-3 text-sm px-4 py-2 h-[39px] bg-blue-900/20 rounded-lg border border-b-2 border-blue-900/20" v-if="this.running">
+                        <i class="bx bx-loader-dots" :class="{
+                            'animate-spin': this.running && !this.paused
+                        }"></i>
+                    </div>
+                    <button @click="pause()" class="flex items-center gap-3 text-sm px-4 py-2 h-[39px] rounded-lg border border-b-2 border-blue-900/20 bg-blue-900/5 outline-none" v-if="this.running && !this.paused">
+                        <i class="bx bx-pause"></i>
+                    </button>
+                    <button @click="resume()" class="flex items-center gap-3 text-sm px-4 py-2 h-[39px] rounded-lg border border-b-2 border-blue-900/20 bg-blue-900/5 outline-none" v-if="this.running && this.paused">
+                        <i class="bx bx-play"></i>
+                    </button>
+                    <button @click="stop()" class="flex items-center gap-3 text-sm px-4 py-2 h-[39px] rounded-lg border border-b-2 border-blue-900/20 bg-blue-900/5 outline-none" v-if="this.running">
+                        <i class="bx bx-stop"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2 rounded-lg border border-b-2 border-blue-900/20 px-4 bg-blue-900/5 h-[39px] text-xs select-none" v-if="activeWindow && targetWindow">
+                    <div class="w-[10px] h-[10px] rounded-full" :class="{
+                        'bg-red-500': targetWindow?.pid !== activeWindow?.pid,
+                        'bg-green-500': targetWindow?.pid === activeWindow?.pid
+                    }"></div>
+                    <h2>{{ activeWindow?.title }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+	export default {
+		name: 'App',
+        data() {
+            return {
+                openApps: null,
+                activeWindow: null,
+                activeWindowInterval: null,
+                messages: [
+                    "Hey, come get some 500m shits!",
+                    "We doing a drop partyyyy!",
+                    "Hey, come get some 500m shits!",
+                    "We doing a drop partyyyy!",
+                    "Hey, come get some 500m shits!",
+                    "We doing a drop partyyyy!",
+                    "Hey, come get some 500m shits!",
+                    "We doing a drop partyyyy!",
+                    "Hey, come get some 500m shits!",
+                    "We doing a drop partyyyy!",
+                    "Hey, come get some 500m shits!",
+                    "We doing a drop partyyyy!",
+                    "Hey, come get some 500m shits!",
+                    "We doing a drop partyyyy!",
+                    "Hey, come get some 500m shits!",
+                    "We doing a drop partyyyy!",
+                    "Hey, come get some 500m shits!",
+                    "We doing a drop partyyyy!",
+                ],
+                editingMessage: null,
+                editingMessageValue: "",
+                settingsOpen: false,
+                targetWindowDropdownOpen: false,
+                newMessageModalOpen: false,
+                newMessage: "",
+                targetWindow: null,
+                isSettingShortcut: false,
+                newShortcutSetting: [],
+                shortcut: [
+                    'CommandOrControl',
+                    'Shift',
+                    'H'
+                ],
+
+                running: false,
+                paused: false,
+                tick: 0,
+                messageIndex: 0,
+                nextTick: null,
+                tickInterval: null,
+                minDelay: 1,
+                maxDelay: 2,
+            }
+        },
+        async mounted() {
+            this.openApps = await window.electronAPI.getOpenApplications();
+            this.activeWindow = await window.electronAPI.getActiveWindow();
+
+            this.activeWindowInterval = setInterval(async () => {
+                this.activeWindow = await window.electronAPI.getActiveWindow();
+            }, 500);
+
+            document.addEventListener('keydown', this.handleKeyDown);
+        },
+        beforeUnmount() {
+            clearInterval(this.activeWindowInterval);
+            clearInterval(this.tickInterval);
+            document.removeEventListener('keydown', this.handleKeyDown);
+        },
+        methods: {
+            editMessage(index) {
+                this.editingMessage = index;
+                this.editingMessageValue = this.messages[index];
+                this.$nextTick(() => {
+                    document.getElementById('message-input-' + index).focus();
+                });
+            },
+            cancelEditMessage() {
+                this.editingMessage = null;
+                this.editingMessageValue = "";
+            },
+            saveMessage(index) {
+                this.messages[index] = this.editingMessageValue;
+                this.editingMessage = null;
+                this.editingMessageValue = "";
+            },
+            addMessage() {
+                if(this.newMessage.trim().length > 0 && this.newMessageLength <= 80) {
+                    this.messages.push(this.newMessage.trim());
+                    this.newMessage = "";
+                }
+            },
+            deleteMessage(index) {
+                this.messages = this.messages.filter((_, i) => i !== index);
+            },
+            setTargetWindow(window) {
+                this.targetWindow = window;
+                this.targetWindowDropdownOpen = false;
+            },
+            toggleTargetWindowDropdown() {
+                this.targetWindowDropdownOpen = !this.targetWindowDropdownOpen;
+            },
+            toggleSettings() {
+                this.settingsOpen = !this.settingsOpen;
+            },
+            toggleSettingShortcut() {
+                if(this.isSettingShortcut) {
+                    this.isSettingShortcut = false;
+                } else {
+                    this.isSettingShortcut = true;
+                    this.newShortcutSetting = [];
+                }
+            },
+            saveNewShortcut() {
+                this.shortcut = this.newShortcutSetting;
+                this.isSettingShortcut = false;
+            },
+            handleKeyDown(event) {
+                if(event.key === 'Escape') {
+                    if(this.newMessageModalOpen) {
+                        this.newMessageModalOpen = false;
+                    }
+                }
+
+                if(this.isSettingShortcut) {
+                    this.addShortcutKey(event.key);
+                }
+            },
+            addShortcutKey(key) {
+                if(this.newShortcutSetting.includes(key)) {
+                    return;
+                }
+
+                if(this.newShortcutSetting.length >= 3) {
+                    return;
+                }
+
+                this.newShortcutSetting.push(key);
+            },
+
+            // Autotyper methods
+            start() {
+                this.messageIndex = 0;
+                this.tick = 0;
+                this.nextTick = Math.floor(Math.random() * (this.maxDelay - this.minDelay + 1)) + this.minDelay;
+                this.running = true;
+                this.paused = false;
+                this.tickInterval = setInterval(() => {
+                    this.doTick();
+                }, 1000);
+            },
+            doTick() {
+                this.tick++;
+
+                if(this.tick >= this.nextTick) {
+                    this.typeMessage();
+                    this.nextTick = Math.floor(Math.random() * (this.maxDelay - this.minDelay + 1)) + this.minDelay;
+                    this.tick = 0;
+                }
+
+                if(this.messageIndex >= this.messages.length) {
+                    this.stop();
+                    this.start();
+                }
+            },
+            pause() {
+                this.paused = true;
+                clearInterval(this.tickInterval);
+            },
+            resume() {
+                this.paused = false;
+                this.tickInterval = setInterval(() => {
+                    this.doTick();
+                }, 1000);
+            },
+            stop() {
+                this.running = false;
+                this.paused = false;
+                clearInterval(this.tickInterval);
+                this.tick = 0;
+            },
+            typeMessage() {
+                const message = this.messages[this.messageIndex];
+                console.log(message);
+                this.messageIndex++;
+            },
+
+            // ElectronAPI methods
+            minimizeWindow() {
+                window.electronAPI.minimize();
+            },
+            closeWindow() {
+                window.electronAPI.close();
+            }
+        },
+        computed: {
+            newMessageLength() {
+                return this.newMessage.length;
+            }
+        }
+	}
+</script>
